@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt-nodejs');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const database = {
 	users: [
@@ -26,6 +27,7 @@ const database = {
 const app = express();
 
 app.use(bodyParser.json())
+app.use(cors());
 
 app.get('/', (req, res)=>{
 	res.send(database.users);
@@ -35,9 +37,9 @@ app.post('/signin', (req,res) => {
 	const { email, password } = req.body;
 
 	// Load hash from your password DB.
-	bcrypt.compare("bacon", hash, function(err, res) {
-	    // res == true
-	});
+	// bcrypt.compare("bacon", hash, function(err, res) {
+	//     // res == true
+	// });
 
 	if(email === database.users[0].email &&
 	 password === database.users[0].password) {
