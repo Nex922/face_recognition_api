@@ -8,7 +8,7 @@ const database = {
 		{
 			id: 123,
 			name: 'John',
-			email: 'calypsonian@phacoidoscope.com',
+			email: 'prefectoral@sparm.com',
 			password: 'test',
 			entries: 0,
 			joined: new Date()
@@ -43,7 +43,7 @@ app.post('/signin', (req,res) => {
 
 	if(email === database.users[0].email &&
 	 password === database.users[0].password) {
-		res.json('logging in')
+		res.json(database.users[0])
 	} else {
 		res.status(403).json('Wrong username or password');
 	}
@@ -51,7 +51,11 @@ app.post('/signin', (req,res) => {
 
 app.post('/register', (req,res) => {
 	const { email, name, password } = req.body;
-	bcrypt.hash(password, null, null, function(err, hash) {
+	if (!email || !name || !password) {
+		res.status(400).json('Missing data');
+	}
+
+/*	bcrypt.hash(password, null, null, function(err, hash) {
 		database.users.push({
 		id: 125,
 		name: name,
@@ -60,8 +64,16 @@ app.post('/register', (req,res) => {
 		entries: 0,
 		joined: new Date()
 	})
-	res.json(`User ${database.users[database.users.length -1].name} created`);
-	});
+	res.json(database.users[database.users.length -1]);
+	});*/
+	database.users.push({
+		id: 125,
+		name: name,
+		email: email,
+		entries: 0,
+		joined: new Date()
+	})
+	res.json(database.users[database.users.length -1]);
 })
 
 app.get('/profile/:id', (req, res) => {
