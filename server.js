@@ -2,27 +2,22 @@ const express = require('express');
 const bcrypt = require('bcrypt-nodejs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const knex = require('knex');
 
-const database = {
-	users: [
-		{
-			id: 123,
-			name: 'John',
-			email: 'prefectoral@sparm.com',
-			password: 'test',
-			entries: 0,
-			joined: new Date()
-		},
-		{
-			id: 124,
-			name: 'Destiny',
-			email: 'gocart@octavina.edu',
-			password: 'test2',
-			entries: 0,
-			joined: new Date()
-		}
-	],
-}
+const db = knex({
+  client: 'pg',
+  connection: {
+    host : '127.0.0.1',
+    port: '5432',
+    user : 'smartbrain',
+    password : 'test',
+    database : 'smart-brain'
+  }
+});
+
+db.select('*').from('users').then(data => {
+	console.log(data);
+});
 
 const app = express();
 
@@ -55,25 +50,17 @@ app.post('/register', (req,res) => {
 		res.status(400).json('Missing data');
 	}
 
-/*	bcrypt.hash(password, null, null, function(err, hash) {
-		database.users.push({
-		id: 125,
-		name: name,
-		email: email,
-		password: hash,
-		entries: 0,
-		joined: new Date()
-	})
-	res.json(database.users[database.users.length -1]);
-	});*/
-	database.users.push({
-		id: 125,
-		name: name,
-		email: email,
-		entries: 0,
-		joined: new Date()
-	})
-	res.json(database.users[database.users.length -1]);
+	db('users')
+		.returning('*')
+		.insert({
+			email: email,
+			name: name,
+			joined: new Date()
+		})
+		.then(user => {
+			res.status(200).json(user[0]);
+		})
+		.catch(err => res.status(400).json("Cannot register user."))
 })
 
 app.get('/profile/:id', (req, res) => {
