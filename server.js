@@ -3,6 +3,10 @@ const bcrypt = require('bcrypt-nodejs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const knex = require('knex');
+const register = require('./controllers/register');
+const signin = require('./controllers/signin');
+const image = require('./controllers/image');
+const profile = require('./controllers/profile');
 
 const db = knex({
   client: 'pg',
@@ -15,10 +19,6 @@ const db = knex({
   }
 });
 
-db.select('*').from('users').then(data => {
-	console.log(data);
-});
-
 const app = express();
 
 app.use(bodyParser.json())
@@ -28,67 +28,11 @@ app.get('/', (req, res)=>{
 	res.send(database.users);
 })
 
-app.post('/signin', (req,res) => {
-	const { email, password } = req.body;
-
-	// Load hash from your password DB.
-	// bcrypt.compare("bacon", hash, function(err, res) {
-	//     // res == true
-	// });
-
-	if(email === database.users[0].email &&
-	 password === database.users[0].password) {
-		res.json(database.users[0])
-	} else {
-		res.status(403).json('Wrong username or password');
-	}
-})
-
-app.post('/register', (req,res) => {
-	const { email, name, password } = req.body;
-	if (!email || !name || !password) {
-		res.status(400).json('Missing data');
-	}
-
-	db('users')
-		.returning('*')
-		.insert({
-			email: email,
-			name: name,
-			joined: new Date()
-		})
-		.then(user => {
-			res.status(200).json(user[0]);
-		})
-		.catch(err => res.status(400).json("Cannot register user."))
-})
-
-app.get('/profile/:id', (req, res) => {
-	const { id } = req.params;
-	let found = false;
-
-	database.users.forEach(user => {
-		if(user.id === Number(id)){
-			found = true;
-			return res.json(user)
-		} 
-	})
-	if (!found) res.status(404).json('User not found');
-})
-
-app.put('/image', (req, res) => {
-	const { id } = req.body;
-	let found = false;
-
-	database.users.forEach(user => {
-		if(user.id === Number(id)){
-			found = true;
-			user.entries++;
-			return res.json(user.entries);
-		} 
-	})
-	if (!found) res.status(404).json('User not found');
-})
+//req, res are included automatically
+app.post('/signin', signin.handleSignIn(db, bcrypt));
+app.post('/register', register.handleRegister(db, bcrypt));
+app.get('/profile/:id', profile.handleProfile(db));
+app.put('/image', (req, res) => { image.handleImage(req, res, db) });
 
 app.listen(3000, ()=> {
 	console.log('APP is running on port 3000');
