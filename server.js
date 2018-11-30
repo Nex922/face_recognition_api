@@ -32,7 +32,7 @@ app.get('/', (req, res)=>{
 app.post('/signin', signin.handleSignIn(db, bcrypt));
 app.post('/register', register.handleRegister(db, bcrypt));
 app.get('/profile/:id', profile.handleProfile(db));
-app.put('/image', (req, res) => { image.handleImage(erq, res, db) });
+app.put('/image', (req, res) => { image.handleImage(req, res, db) });
 
 app.listen(process.env.PORT || 3000, ()=> {
 	console.log(`APP is running on port ${process.env.PORT}`);
